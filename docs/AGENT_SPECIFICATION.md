@@ -4,7 +4,7 @@ MilanAI features two dedicated modular intelligence agents:
 
 ---
 
-## 1. MilanAiAgent (`src/agents/milanAiAgent.ts`)
+## 1. MilanAiAgent (`server/config/ai.ts`)
 - **Role**: AI Matchmaker & Compatibility Analyzer
 - **Responsibilities**:
   1. Multi-vector personality distance scoring:
@@ -15,9 +15,9 @@ MilanAI features two dedicated modular intelligence agents:
 
 ---
 
-## 2. SafetyAgent (`src/agents/safetyAgent.ts`)
+## 2. SafetyAgent (`server/config/ai.ts`)
 - **Role**: Privacy Guardian & PII Interceptor
 - **Responsibilities**:
-  1. Phone number masking (`+91 98XXXXXX10`).
+  1. Email address masking (`aa***@milanai.com`).
   2. Location obfuscation (displays generalized `< 5 km` city distance buckets).
-  3. Pre-dispatch chat message scanner (detects phone numbers, emails, addresses, banking keywords, and attaches inline safety alerts).
+  3. Pre-dispatch chat message scanner (detects unverified emails, phone numbers, addresses, banking keywords, and attaches inline safety alerts).

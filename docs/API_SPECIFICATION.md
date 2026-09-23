@@ -6,7 +6,7 @@ This document details the complete API contract for MilanAI. All endpoints use J
 
 ## Base URLs
 - **Production**: `https://api.milanai.app/v1`
-- **Staging / Local**: `http://localhost:8000/v1`
+- **Staging / Local**: `http://localhost:5000/api`
 
 ---
 
@@ -23,12 +23,51 @@ X-Client-Version: 1.0.0
 ## 1. Authentication Endpoints (`/auth`)
 
 ### 1.1 POST `/auth/otp/send`
-- **Body**: `{ "phone": "9876543210", "countryCode": "+91" }`
-- **Response**: `{ "success": true, "data": { "sessionId": "sess_123", "expiresInSeconds": 300, "isMock": true, "testPin": "123456" } }`
+- **Description**: Generates and dispatches a 6-digit verification code to the user's email address via MailHog / SMTP.
+- **Body**: `{ "email": "aarav.sharma@milanai.com" }`
+- **Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "sessionId": "sess_1790166721482",
+    "expiresInSeconds": 300,
+    "isMock": true,
+    "testPin": "123456",
+    "emailSent": true,
+    "previewUrl": "http://localhost:8025"
+  },
+  "message": "OTP dispatched to aarav.sharma@milanai.com. Check your inbox in MailHog at http://localhost:8025"
+}
+```
 
 ### 1.2 POST `/auth/otp/verify`
-- **Body**: `{ "phone": "9876543210", "otp": "123456", "sessionId": "sess_123" }`
-- **Response**: `{ "success": true, "data": { "accessToken": "jwt_token...", "refreshToken": "ref_token...", "user": { ... } } }`
+- **Description**: Verifies the 6-digit PIN and returns session tokens and the user's MongoDB profile.
+- **Body**: `{ "email": "aarav.sharma@milanai.com", "otp": "123456", "sessionId": "sess_123" }`
+- **Response**:
+```json
+{
+  "success": true,
+  "data": {
+    "accessToken": "jwt_mongo_1790166721598",
+    "refreshToken": "ref_mongo_1790166721598",
+    "user": {
+      "id": "usr_me_01",
+      "email": "aarav.sharma@milanai.com",
+      "emailMasked": "aa***@milanai.com",
+      "displayName": "Aarav Sharma",
+      "age": 28,
+      "gender": "male",
+      "city": "Bengaluru",
+      "coreValues": { ... },
+      "isPremium": true,
+      "premiumTier": "gold"
+    },
+    "isNewUser": false
+  },
+  "message": "Authentication successful"
+}
+```
 
 ---
 
@@ -49,7 +88,7 @@ X-Client-Version: 1.0.0
 
 ### 3.1 GET `/matches/feed`
 - **Query Params**: `radiusKm`, `minAge`, `maxAge`, `relationshipGoals`, `minScore`, `page`, `limit`
-- Returns paginated match candidates with AI compatibility breakdowns.
+- Returns paginated match candidates with AI compatibility breakdowns and masked email identifiers.
 
 ### 3.2 POST `/matches/action`
 - **Body**: `{ "candidateId": "usr_cand_01", "action": "accepted" | "rejected" | "superlike" }`
@@ -64,8 +103,8 @@ X-Client-Version: 1.0.0
 ### 4.2 GET `/chat/conversations/:matchId/messages`
 - Returns message thread.
 
-### 4.3 POST `/chat/conversations/:matchId/messages`
-- **Body**: `{ "content": "Hey! How was your weekend?", "type": "text" }`
+### 4.3 POST `/chat/messages`
+- **Body**: `{ "matchId": "match_01", "content": "Hey! How was your weekend?" }`
 - Automatically intercepts PII (phones, emails, addresses) and sets `safetyFlagged: true`.
 
 ---
@@ -76,7 +115,7 @@ X-Client-Version: 1.0.0
 - Returns Gold (₹499/mo) and VIP (₹999/mo) tier options and perk matrices.
 
 ### 5.2 POST `/subscriptions/checkout`
-- **Body**: `{ "planTier": "gold" | "vip", "paymentMethod": "mock_test" }`
+- **Body**: `{ "planTier": "gold" | "vip", "paymentMethod": "sandbox" }`
 
 ---
 

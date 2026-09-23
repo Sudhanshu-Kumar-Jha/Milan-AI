@@ -9,22 +9,32 @@ This guide explains how to configure production API keys or use default developm
 | Service | **Default Mode (No Keys Required)** | **Live Mode (Add Keys in `.env`)** |
 | :--- | :--- | :--- |
 | **Database** | Local MongoDB (`mongodb://127.0.0.1:27017/milanai`) | MongoDB Atlas Cloud Connection String |
-| **SMS & OTP** | Instant test PIN: `123456` | Real SMS via **Twilio API** |
+| **Email & OTP** | Local MailHog SMTP (`localhost:1025`, Web: `8025`) | Production SMTP (SendGrid, AWS SES, Resend) |
 | **AI Matching** | Built-in 5-vector similarity engine | **Google Gemini** or **OpenAI** API |
 | **Payment Gateway** | Instant sandbox approval on checkout | **Razorpay** (UPI/Cards) or **Stripe** |
 
 ---
 
-## 1. SMS & OTP (Twilio)
-To send real SMS to users' mobile phones:
-1. Sign up at [twilio.com](https://www.twilio.com/).
-2. Obtain your **Account SID**, **Auth Token**, and **Twilio Phone Number**.
-3. In your `.env` file:
+## 1. Email & OTP Verification (MailHog / SMTP)
+Milan AI uses email OTP verification with local MailHog support out-of-the-box:
+
+1. **Local Development (Default)**:
    ```env
-   SMS_PROVIDER=twilio
-   TWILIO_ACCOUNT_SID=ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-   TWILIO_AUTH_TOKEN=your_auth_token_here
-   TWILIO_PHONE_NUMBER=+1234567890
+   SMTP_HOST=localhost
+   SMTP_PORT=1025
+   SMTP_USER=
+   SMTP_PASS=
+   SMTP_FROM="Milan AI Support" <noreply@milanai.com>
+   MAILHOG_WEB_URL=http://localhost:8025
+   DEFAULT_TEST_OTP=123456
+   ```
+2. **Production SMTP (SendGrid / AWS SES / Custom)**:
+   ```env
+   SMTP_HOST=smtp.sendgrid.net
+   SMTP_PORT=587
+   SMTP_USER=apikey
+   SMTP_PASS=your_sendgrid_api_key
+   SMTP_FROM="Milan AI" <support@yourdomain.com>
    ```
 
 ---
@@ -59,7 +69,7 @@ To process real payments for Milan Gold & VIP Concierge:
 ---
 
 ## 4. How to Seed the Database
-To reset or re-populate the MongoDB database with 6 rich demo profiles, mutual matches, and message threads:
+To reset or re-populate the MongoDB database with 11 rich demo profiles across Indian metros, mutual matches, and message threads:
 ```powershell
 npm run seed
 ```

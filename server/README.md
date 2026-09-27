@@ -40,28 +40,20 @@ npm install
 
 ---
 
-### Step 2: Environment Configuration
+### Step 2: Cloud Environment Configuration
 
-Create or verify the `.env` file in the root directory:
+Configure your environment variables in your cloud hosting provider (e.g. **Railway Variables** or `.env`):
 
 ```ini
 # ==============================================================================
-# Milan AI — Server Environment Configuration
+# Milan AI — Production Server Environment Configuration
 # ==============================================================================
 
 # Server & Runtime
-NODE_ENV=development
+NODE_ENV=production
 PORT=5000
-
-# Primary MongoDB Connection URI
-# Option A: Local MongoDB
-MONGODB_URI=mongodb://127.0.0.1:27017/milanai
-
-# Option B: MongoDB Atlas Cloud (Replace <username> and <db_password> with your Atlas Database User credentials)
-# MONGODB_URI=mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
-
-# JWT Authentication Secret
-JWT_SECRET=milan_dev_secret_key_2026_mindful_matrimony
+MONGODB_URI=mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
+JWT_SECRET=milan_prod_secret_2026_mindful_matrimony
 
 # Email Delivery (Gmail Real SSL SMTP)
 MAIL_DRIVER=gmail
@@ -78,29 +70,15 @@ AI_PROVIDER=default
 GEMINI_API_KEY=AIzaSyYourCopiedKeyHere
 
 # Client Application URL for CORS
-CLIENT_URL=http://localhost:3000
-VITE_API_BASE_URL=http://localhost:5000/api
+CLIENT_URL=*
 ```
 
 ---
 
-### 🌐 MongoDB Atlas Setup Checklist
+### Step 3: Seed Database via Cloud Terminal / Railway Console
 
-1. **Connection String**: `mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority`
-2. **Database Password**: Set the password created for your database user under Atlas *Database Access*.
-3. **Network Access**: Add `0.0.0.0/0` (Allow Access from Anywhere) under Atlas *Network Access*.
+To populate the cloud database with 11 authentic verified Indian profiles, match synergies, chat conversations, and initial platform settings:
 
----
-
-### Step 3: Initialize & Seed the Database
-
-To seed verified authentic Indian candidate profiles, matches, chat conversations, and initial platform settings into your local or Atlas database:
-
-```bash
-npm run seed
-```
-
-*Or run with tsx directly:*
 ```bash
 npx tsx server/seed.ts
 ```

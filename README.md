@@ -62,29 +62,22 @@ npm install
 
 ---
 
-### Step 2: Environment Variables Setup (`.env`)
+### Step 2: Cloud Environment Configuration
 
-Create or update the `.env` file in the root folder with the following production-ready configuration:
+Configure your environment variables in your cloud hosting provider (e.g. **Railway Variables** or root `.env`):
 
 ```ini
 # ==============================================================================
-# Milan AI — Master Server Environment Configuration
+# Milan AI — Master Production Environment Configuration
 # ==============================================================================
 
 # 1. Server & Database
-NODE_ENV=development
+NODE_ENV=production
 PORT=5000
+MONGODB_URI=mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
+JWT_SECRET=milan_prod_secret_2026_mindful_matrimony
 
-# Primary MongoDB Connection URI:
-# Option A: Local MongoDB
-MONGODB_URI=mongodb://127.0.0.1:27017/milanai
-
-# Option B: MongoDB Atlas Cloud (Replace <username> and <db_password> with your Atlas Database User credentials)
-# MONGODB_URI=mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
-
-JWT_SECRET=milan_dev_secret_key_2026_mindful_matrimony
-
-# 2. Email & Real OTP Delivery (Gmail SMTP SSL)
+# 2. Real Gmail SMTP SSL OTP Delivery
 MAIL_DRIVER=gmail
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=465
@@ -98,48 +91,40 @@ MAIL_FROM_NAME="Milan AI"
 AI_PROVIDER=default
 GEMINI_API_KEY=AIzaSyYourCopiedKeyHere
 
-# 4. CORS Client Allowance & API URL
-CLIENT_URL=http://localhost:3000
-VITE_API_BASE_URL=http://localhost:5000/api
+# 4. CORS Client Allowance
+CLIENT_URL=*
 ```
 
 ---
 
-### 🌐 MongoDB Atlas Cloud Setup (Step-by-Step)
+### 🌐 MongoDB Atlas Setup (Cloud Database)
 
-If you are using **MongoDB Atlas** instead of a local MongoDB server:
-
-1. **Obtain your Connection URI:**
-   - In MongoDB Atlas, go to **Clusters** → Click **Connect** → Choose **Drivers** (Node.js).
-   - Copy the connection string:
+1. **Obtain Connection URI:**
+   - In MongoDB Atlas, go to **Clusters** → **Connect** → **Drivers** (Node.js).
+   - Copy connection string:
      ```text
      mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
      ```
-2. **Replace the Password & Username:**
-   - Replace `<username>` and `<db_password>` with the **Database User** credentials created in Atlas (*Security → Database Access*).
-   - *Note:* If your password contains special characters like `@`, `#`, `%`, or `/`, URL-encode them (e.g. `@` → `%40`, `#` → `%23`).
-3. **Configure Network Access (Crucial):**
+2. **Database User Credentials:**
+   - Replace `<username>` and `<db_password>` with your Atlas database user credentials (*Security → Database Access*).
+3. **Network Access (Crucial for Cloud Deployments):**
    - Go to Atlas → **Security** → **Network Access** → Click **Add IP Address**.
    - Select **Allow Access from Anywhere** (`0.0.0.0/0`) and click **Confirm**.
-4. **Paste into `.env`:**
-   - Set `MONGODB_URI=mongodb+srv://...` in your root [.env](file:///c:/Users/Babul/OneDrive/Desktop/MillanAI/.env) file.
-
-> #### 🔑 Understanding `MAIL_PASSWORD`:
-> - `MAIL_PASSWORD` is **not** your regular personal Gmail password.
-> - It is a **16-character Google App Password** generated securely from [Google Account Security](https://myaccount.google.com/security) → **App Passwords**.
-> - Google requires this 16-character key so your server can authenticate with Gmail's SSL SMTP server (Port 465) without exposing your personal account password.
 
 ---
 
-### Step 3: Seed MongoDB with Initial Data
+### Step 3: Seed Database via Railway Console / Cloud CLI
 
-Populate your local or MongoDB Atlas cloud database with 11 verified authentic Indian candidate profiles, match synergies, chat histories, and platform settings:
+To populate the cloud database with 11 authentic verified Indian profiles, match synergies, chats, and posts:
 
+**Option A (Automatic):**
+The server automatically detects if the database is empty on boot and runs the seed sequence on first start.
+
+**Option B (Railway Cloud Console):**
+Open your server service in Railway → click **"CLI"** / **"Terminal"** tab and run:
 ```bash
-npm run seed
+npx tsx server/seed.ts
 ```
-
-*(Or execute directly with tsx: `npx tsx server/seed.ts`)*
 
 ---
 

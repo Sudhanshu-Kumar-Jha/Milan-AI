@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" fill="none">
+  <defs>
+    <linearGradient id="milanPinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FF1378" />
+      <stop offset="100%" stopColor="#E60067" />
+    </linearGradient>
+    <linearGradient id="milanPurpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#963DFF" />
+      <stop offset="100%" stopColor="#6C22E8" />
+    </linearGradient>
+    <linearGradient id="milanBlendGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#A819AA" stopOpacity="0.85" />
+      <stop offset="100%" stopColor="#871796" stopOpacity="0.95" />
+    </linearGradient>
+  </defs>
+  <path d="M 60 85 C 42 70 14 52 14 30 C 14 15 26 6 40 6 C 50 6 56 12 60 18 C 62 15 67 10 74 7 C 62 12 52 24 52 38 C 52 60 60 85 60 85 Z" fill="url(#milanPinkGrad)" />
+  <path d="M 60 85 C 78 70 106 52 106 30 C 106 15 94 6 80 6 C 70 6 64 12 60 18 C 58 15 53 10 46 7 C 58 12 68 24 68 38 C 68 60 60 85 60 85 Z" fill="url(#milanPurpleGrad)" />
+  <path d="M 60 18 C 66 26 70 36 70 47 C 70 64 60 85 60 85 C 60 85 50 64 50 47 C 50 36 54 26 60 18 Z" fill="url(#milanBlendGrad)" />
+</svg>

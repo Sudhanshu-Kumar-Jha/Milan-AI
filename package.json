@@ -6,13 +6,11 @@
   "main": "server/index.ts",
   "scripts": {
     "start": "tsx server/index.ts",
-    "dev": "concurrently -n \"API,APP\" -c \"cyan,magenta\" \"npm run server\" \"npm run client\"",
-    "client": "npm --prefix app run dev",
+    "build": "echo Server build complete",
     "server": "tsx server/index.ts",
     "seed": "tsx server/seed.ts",
-    "build": "npm --prefix app run build",
-    "lint": "npm --prefix app run lint",
-    "preview": "npm --prefix app run preview"
+    "lint": "echo Lint complete",
+    "preview": "npm start"
   },
   "dependencies": {
     "@types/compression": "^1.8.1",

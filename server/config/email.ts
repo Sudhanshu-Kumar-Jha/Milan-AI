@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import dns from 'node:dns';
 
-// Ensure IPv4 resolution first in Node DNS lookup to prevent cloud container ENETUNREACH
+// Ensure IPv4 resolution first globally
 if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
@@ -30,16 +30,25 @@ export function createEmailTransporter(portOverride?: number, secureOverride?: b
     host,
     port,
     secure: isSecure,
-    family: 4, // Explicitly force IPv4 socket connection
+    // Custom IPv4-only DNS lookup to strictly prevent ENETUNREACH IPv6 routing errors in cloud containers
+    lookup: (hostname, _options, callback) => {
+      dns.lookup(hostname, { family: 4, all: false }, (err, address, family) => {
+        if (err) {
+          // Fallback to Google SMTP known public IPv4 if DNS times out
+          return callback(null, '64.233.184.108', 4);
+        }
+        callback(null, address, family);
+      });
+    },
     auth: {
       user,
       pass: cleanPass,
     },
     tls: {
+      servername: 'smtp.gmail.com',
       rejectUnauthorized: false,
-      ciphers: 'SSLv3',
     },
-    connectionTimeout: 10000, // 10s connection timeout
+    connectionTimeout: 12000,
     greetingTimeout: 8000,
     socketTimeout: 15000,
   });
@@ -106,7 +115,7 @@ export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpE
     `,
   };
 
-  // Primary Attempt: Port 465 (SSL) with forced IPv4
+  // Primary Attempt: Port 465 (SSL)
   try {
     const primaryTransporter = createEmailTransporter(465, true);
     const info = await primaryTransporter.sendMail(mailOptions);
@@ -117,9 +126,9 @@ export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpE
       driver: 'gmail-465',
     };
   } catch (primaryError: any) {
-    console.warn(`⚠️ [Mail Engine] Port 465 attempt to ${email} encountered: ${primaryError.message}. Trying Port 587 STARTTLS...`);
+    console.warn(`⚠️ [Mail Engine] Port 465 attempt to ${email} encountered: ${primaryError.message}. Retrying via Port 587 STARTTLS...`);
 
-    // Secondary Attempt: Port 587 (STARTTLS) with forced IPv4
+    // Secondary Attempt: Port 587 (STARTTLS)
     try {
       const fallbackTransporter = createEmailTransporter(587, false);
       const info = await fallbackTransporter.sendMail(mailOptions);

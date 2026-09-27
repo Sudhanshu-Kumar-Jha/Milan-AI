@@ -59,8 +59,24 @@ app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Serve compiled React frontend application (SPA)
 const webDistPath = path.resolve(__dirname, 'public/web');
+
+// Detect if request originates from the official Milan AI Mobile App (WebView / Custom Header)
+const isMobileAppRequest = (req: express.Request): boolean => {
+  const customHeader = (req.get('x-milan-app') || '').toLowerCase();
+  const userAgent = (req.get('user-agent') || '').toLowerCase();
+  const clientQuery = (req.query.client as string || '').toLowerCase();
+
+  return (
+    customHeader.includes('native-mobile') ||
+    userAgent.includes('milanai-mobileapp') ||
+    userAgent.includes('wv') || // Standard Android WebView indicator
+    clientQuery === 'milan-mobile'
+  );
+};
+
+// Serve static script/css assets when requested by the mobile app bundle (index: false prevents auto-serving index.html to desktop browsers)
 if (fs.existsSync(webDistPath)) {
-  app.use(express.static(webDistPath));
+  app.use(express.static(webDistPath, { index: false }));
 }
 
 // Health & System Status Endpoint for Railway & monitoring
@@ -86,15 +102,21 @@ app.use('/api/config', configRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/posts', postRouter);
 
-// SPA Fallback Route: Serve index.html for all page routes
+// Universal Route Handler:
+// - Desktop Browsers (Chrome / Safari / Edge): Returns pure REST API JSON
+// - Official Mobile App: Serves full interactive Milan AI App UI
 app.use((req, res, next) => {
   if (req.method !== 'GET') return next();
   if (req.path.startsWith('/api') || req.path.startsWith('/avatars') || req.path.startsWith('/public')) {
     return next();
   }
-  if (fs.existsSync(path.join(webDistPath, 'index.html'))) {
+
+  // If request is from our Mobile App, serve the full interactive UI
+  if (isMobileAppRequest(req) && fs.existsSync(path.join(webDistPath, 'index.html'))) {
     return res.sendFile(path.join(webDistPath, 'index.html'));
   }
+
+  // Otherwise, default response for Desktop Browsers is pure REST API JSON
   res.json({
     name: 'Milan AI Production REST API',
     status: 'online',

@@ -57,17 +57,11 @@ app.use('/api', (_req, res, next) => {
 app.use('/avatars', express.static(path.join(__dirname, 'public/avatars')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Root welcome endpoint for Railway health monitoring & REST API status
-app.get('/', (_req, res) => {
-  res.json({
-    name: 'Milan AI Production REST API',
-    status: 'online',
-    health: '/api/health',
-    version: '1.0.0',
-    database: isDbConnected() ? 'connected' : 'connecting',
-    timestamp: new Date().toISOString(),
-  });
-});
+// Serve compiled React frontend application (SPA)
+const webDistPath = path.resolve(__dirname, 'public/web');
+if (fs.existsSync(webDistPath)) {
+  app.use(express.static(webDistPath));
+}
 
 // Health & System Status Endpoint for Railway & monitoring
 app.get('/api/health', (_req, res) => {
@@ -91,6 +85,25 @@ app.use('/api/admin', adminRouter);
 app.use('/api/config', configRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/posts', postRouter);
+
+// SPA Fallback Route: Serve index.html for all page routes
+app.use((req, res, next) => {
+  if (req.method !== 'GET') return next();
+  if (req.path.startsWith('/api') || req.path.startsWith('/avatars') || req.path.startsWith('/public')) {
+    return next();
+  }
+  if (fs.existsSync(path.join(webDistPath, 'index.html'))) {
+    return res.sendFile(path.join(webDistPath, 'index.html'));
+  }
+  res.json({
+    name: 'Milan AI Production REST API',
+    status: 'online',
+    health: '/api/health',
+    version: '1.0.0',
+    database: isDbConnected() ? 'connected' : 'connecting',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Start Server & Connect MongoDB (Non-blocking so HTTP proxy binds in <10ms)
 app.listen(PORT, HOST, () => {

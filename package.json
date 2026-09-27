@@ -6,7 +6,7 @@
   "main": "server/index.ts",
   "scripts": {
     "start": "npx tsx server/index.ts",
-    "build": "npm --prefix app install && npm --prefix app run build",
+    "build": "echo Server build complete",
     "server": "npx tsx server/index.ts",
     "seed": "npx tsx server/seed.ts",
     "lint": "echo Lint complete",

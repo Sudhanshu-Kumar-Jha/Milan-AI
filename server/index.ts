@@ -58,9 +58,16 @@ app.use('/avatars', express.static(path.join(__dirname, 'public/avatars')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Serve compiled React frontend application (SPA)
+const webDistPath = path.resolve(__dirname, 'public/web');
 const appDistPath = path.resolve(__dirname, '../app/dist');
 const serverDistPath = path.resolve(__dirname, 'dist');
-const staticDistPath = fs.existsSync(appDistPath) ? appDistPath : (fs.existsSync(serverDistPath) ? serverDistPath : null);
+const staticDistPath = fs.existsSync(webDistPath)
+  ? webDistPath
+  : fs.existsSync(appDistPath)
+  ? appDistPath
+  : fs.existsSync(serverDistPath)
+  ? serverDistPath
+  : null;
 
 if (staticDistPath) {
   app.use(express.static(staticDistPath));

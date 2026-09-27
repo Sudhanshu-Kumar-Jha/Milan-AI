@@ -17,16 +17,17 @@ tools/mailhog.exe
 test-*.js
 
 # Client App directories (tracked in separate repository)
-app/
-expo-mobile/
-src/
-public/
-index.html
-vite.config.ts
-tsconfig.app.json
-tsconfig.node.json
+/app/
+/expo-mobile/
+/src/
+/public/
+/index.html
+/vite.config.ts
+/tsconfig.app.json
+/tsconfig.node.json
 
-
+# Always track server assets and web bundle
+!server/public/**
 
 # Editor directories and files
 .vscode/*

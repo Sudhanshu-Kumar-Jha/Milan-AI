@@ -1,8 +1,5 @@
 [phases.setup]
 nixPkgs = ["nodejs_22"]
 
-[phases.build]
-cmds = ["npm --prefix app install", "npm --prefix app run build"]
-
 [start]
 cmd = "npx tsx server/index.ts"

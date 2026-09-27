@@ -130,6 +130,7 @@ export const authController = {
             displayName: profileData?.displayName || normalizedEmail.split('@')[0].replace(/[._]/g, ' '),
             age: profileData?.age || 26,
             dob: profileData?.dob || '',
+            gender: profileData?.gender || 'male',
             city: profileData?.city || 'Delhi NCR',
             occupation: profileData?.occupation || 'Professional',
             relationshipGoals: profileData?.relationshipGoals || 'Dating',

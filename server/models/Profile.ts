@@ -60,7 +60,7 @@ const ProfileSchema = new Schema<IProfile>(
     displayName: { type: String, required: true },
     age: { type: Number, required: true },
     dob: { type: String },
-    gender: { type: String, required: true },
+    gender: { type: String, default: 'male' },
     city: { type: String, required: true },
     occupation: { type: String, default: 'Professional' },
     distanceBucket: { type: String, default: '< 10 km' },

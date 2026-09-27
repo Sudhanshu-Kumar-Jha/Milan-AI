@@ -57,8 +57,8 @@ PORT=5000
 # Option A: Local MongoDB
 MONGODB_URI=mongodb://127.0.0.1:27017/milanai
 
-# Option B: MongoDB Atlas Cloud (Replace <db_password> with your Atlas Database User password)
-# MONGODB_URI=mongodb+srv://sudhanshujha0111_db_user:<db_password>@milanai.te8q73a.mongodb.net/milanai?retryWrites=true&w=majority&appName=MilanAI
+# Option B: MongoDB Atlas Cloud (Replace <username> and <db_password> with your Atlas Database User credentials)
+# MONGODB_URI=mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
 
 # JWT Authentication Secret
 JWT_SECRET=milan_dev_secret_key_2026_mindful_matrimony
@@ -86,8 +86,8 @@ VITE_API_BASE_URL=http://localhost:5000/api
 
 ### 🌐 MongoDB Atlas Setup Checklist
 
-1. **Connection String**: `mongodb+srv://sudhanshujha0111_db_user:<db_password>@milanai.te8q73a.mongodb.net/milanai?retryWrites=true&w=majority&appName=MilanAI`
-2. **Database Password**: Set the password created for `sudhanshujha0111_db_user` under Atlas *Database Access*.
+1. **Connection String**: `mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority`
+2. **Database Password**: Set the password created for your database user under Atlas *Database Access*.
 3. **Network Access**: Add `0.0.0.0/0` (Allow Access from Anywhere) under Atlas *Network Access*.
 
 ---

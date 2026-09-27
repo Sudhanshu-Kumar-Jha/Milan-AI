@@ -79,8 +79,8 @@ PORT=5000
 # Option A: Local MongoDB
 MONGODB_URI=mongodb://127.0.0.1:27017/milanai
 
-# Option B: MongoDB Atlas Cloud (Replace <db_password> with your Atlas Database User password)
-# MONGODB_URI=mongodb+srv://sudhanshujha0111_db_user:<db_password>@milanai.te8q73a.mongodb.net/milanai?retryWrites=true&w=majority&appName=MilanAI
+# Option B: MongoDB Atlas Cloud (Replace <username> and <db_password> with your Atlas Database User credentials)
+# MONGODB_URI=mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
 
 JWT_SECRET=milan_dev_secret_key_2026_mindful_matrimony
 
@@ -113,10 +113,10 @@ If you are using **MongoDB Atlas** instead of a local MongoDB server:
    - In MongoDB Atlas, go to **Clusters** → Click **Connect** → Choose **Drivers** (Node.js).
    - Copy the connection string:
      ```text
-     mongodb+srv://sudhanshujha0111_db_user:<db_password>@milanai.te8q73a.mongodb.net/milanai?retryWrites=true&w=majority&appName=MilanAI
+     mongodb+srv://<username>:<db_password>@cluster.mongodb.net/milanai?retryWrites=true&w=majority
      ```
-2. **Replace the Password:**
-   - Replace `<db_password>` with the **Database User Password** created in Atlas (*Security → Database Access*).
+2. **Replace the Password & Username:**
+   - Replace `<username>` and `<db_password>` with the **Database User** credentials created in Atlas (*Security → Database Access*).
    - *Note:* If your password contains special characters like `@`, `#`, `%`, or `/`, URL-encode them (e.g. `@` → `%40`, `#` → `%23`).
 3. **Configure Network Access (Crucial):**
    - Go to Atlas → **Security** → **Network Access** → Click **Add IP Address**.

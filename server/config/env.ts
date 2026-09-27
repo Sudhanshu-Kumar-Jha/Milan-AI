@@ -8,17 +8,7 @@ export const config = {
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/milanai',
   jwtSecret: process.env.JWT_SECRET || 'milan_dev_secret_key_2026_mindful_matrimony',
 
-  // 2. SMS & OTP Service (Twilio / Default Mock)
-  sms: {
-    provider: process.env.SMS_PROVIDER || 'default', // 'twilio' | 'default'
-    twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
-    twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
-    twilioPhoneNumber: process.env.TWILIO_PHONE_NUMBER || '',
-    defaultTestOtp: process.env.DEFAULT_TEST_OTP || '123456',
-    isConfigured: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN),
-  },
-
-  // 3. AI Powered Matchmaking & Safety (Gemini / OpenAI / Default Deterministic Engine)
+  // 2. AI Powered Matchmaking & Safety (Gemini / OpenAI / Default Deterministic Engine)
   ai: {
     provider: process.env.AI_PROVIDER || 'default', // 'gemini' | 'openai' | 'default'
     geminiApiKey: process.env.GEMINI_API_KEY || '',

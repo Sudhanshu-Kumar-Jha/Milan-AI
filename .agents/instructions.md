@@ -1,47 +1,55 @@
-# Milan AI — System & Agent Instructions
+# Milan AI — Unified System & Agent Instructions
 
-This document specifies the operational rules and behavioral constraints for the Milan AI matchmaking and safety ecosystem.
+This document specifies the operational rules, design standards, and behavioral constraints for the Milan AI matchmaking and safety ecosystem across Frontend (`app/`), Backend (`server/`), and Mobile (`expo-mobile/`).
 
 ---
 
-## 1. Matchmaking Agent (`MilanAiAgent`)
-- **Core Mission**: Calculate multi-dimensional compatibility vectors for long-term matrimonial synergy.
+## 1. Core Principles & System Constraints
+
+1. **Camera & Gallery Profile Moments**:
+   - Primary avatar and lifestyle moments captured via real-time WebRTC camera or uploaded directly to the user's personal Instagram-style profile photo grid.
+   - High-resolution full-screen photo viewing with ambient blurred background backdrop and zero image distortion.
+
+2. **100% Self-Hosted Local Image Storage**:
+   - Zero reliance on external photo APIs or Unsplash URLs.
+   - All profile avatars and seeded assets are stored in `server/public/avatars/` and served statically via Express (`/avatars/...`).
+
+3. **Modern Tier-1 Luxury Design System**:
+   - **Typography**: Clean, high-legibility sans-serif (`Plus Jakarta Sans` for body, `Outfit` for display headings) with deliberate font weights (`font-medium`, `font-semibold`, `font-bold`) and tracking (`tracking-tight` for titles).
+   - **Monotone Delicate Icons**: Use `lucide-react` icons with subtle strokes (1.5-2px). Avoid emoji stickers across tags, buttons, and chips.
+   - **Palette**: Sleek dark theme (`#070b12`, `#0d1322`), glassmorphic panels (`glass-card`, `backdrop-blur-md`), and gradient accents (`#FF007F` Milan Rose to `#8B35FF` Violet).
+   - **Splash Screen**: Clean Milan AI logo/favicon splash with smooth progress loading bar and zero background clutter.
+
+4. **Real-Time Presence & WhatsApp-Style Chat Engine**:
+   - Heartbeat online status tracking (`/api/profile/heartbeat`) reflecting exact activity ($\le 3$ min).
+   - Multiline auto-resizing text box supporting `Shift+Enter` for newlines and `Enter` to send.
+   - Sent messages pinned strictly to the right (`justify-end`) and received messages to the left (`justify-start`).
+   - Dynamic glowing send button with active click animations and loading spinner.
+
+---
+
+## 2. Agent Modules
+
+### A. Matchmaking & Synergy Engine (`MilanMatchEngine`)
 - **5-Dimensional Vector Model**:
-  1. `Family Values & Tradition` (Weight: 40%)
-  2. `Career & Ambition Drive` (Weight: 30%)
-  3. `Financial Prudence & Goals` (Weight: 20%)
-  4. `Spontaneity & Adventure` (Weight: 5%)
-  5. `Emotional Expressiveness` (Weight: 5%)
+  1. `Family Values & Tradition` (Weight: 35%)
+  2. `Lifestyle & Daily Habits` (Weight: 25%)
+  3. `Interests & Passions` (Weight: 20%)
+  4. `Goals & Verification Status` (Weight: 20%)
 - **Synergy Calculation**:
-  $$\text{Score} = \sum_{i=1}^5 w_i \times (10 - |\vec{v}_{1,i} - \vec{v}_{2,i}|) \times 10$$
-- **Rule**: Profiles with $\ge 90\%$ synergy score earn the "✨ Mindful Synergy Match" celebration badge.
+  Weighted composite similarity score ranging from 70% to 98% with dynamic synergy explanation and highlights.
 
----
-
-## 2. Safety & Privacy Agent (`PrivacyShieldAgent`)
-- **Core Mission**: Safeguard user privacy and prevent off-platform harassment prior to mutual verification.
+### B. Safety & Privacy Shield (`PrivacyShieldAgent`)
 - **Interception Rules**:
-  - **Phone Number Interception**: Regex `(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|\b\d{10}\b` triggers Privacy Shield warning.
-  - **Email Address Filtering**: Flags raw emails sent in message streams.
-  - **Location Blurring**: Masks exact coordinates into distance radius buckets (e.g. `< 5 km away`).
-  - **Contact Sync Blocker**: Prevents phone address book harvesting.
+  - **Phone Regex**: `(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|\b\d{10}\b`
+  - **Email Regex**: `[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`
+  - **Action**: Flags sensitive PII in unverified chat streams and logs moderation items.
 
----
-
-## 3. Concierge Icebreaker Agent (`MilanConciergeAgent`)
-- **Core Mission**: Suggest thoughtful, respectful conversation starters based on shared interests and values.
-- **Sample Triggers**:
-  - Mutual love for hiking/coffee: *"What's your favorite weekend trail or coffee spot?"*
-  - Shared ambition/creativity: *"What inspired you to pursue design/architecture?"*
-
----
-
-## 4. Authentication & MailHog Local Email Service
-- **Authentication Primary Identifier**: `email` (e.g. `aarav.sharma@milanai.com`).
-- **Email Masking**: Encrypts and masks email addresses across the public UI (e.g. `aa***@milanai.com`).
-- **MailHog Local SMTP**:
-  - SMTP Port: `1025` (handles OTP email dispatch via `nodemailer`).
-  - Web UI Port: `8025` (`http://localhost:8025`) for visual inbox inspection.
-  - Binary Location: `tools/mailhog.exe` (runnable via `npm run mailhog`).
+### C. Authentication & MailHog Local Email Engine
+- **Primary Identifier**: `email` (e.g. `aarav.sharma@milanai.com`).
+- **Email Masking**: Public masking format `aa***@milanai.com`.
+- **Local SMTP Services**:
+  - Nodemailer dispatches verification OTP emails to MailHog on port `1025`.
+  - MailHog Web Inbox available at `http://localhost:8025`.
   - Default Test OTP: `123456`.
 

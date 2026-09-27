@@ -1,0 +1,195 @@
+import { Request, Response } from 'express';
+import { Profile } from '../models/Profile';
+import { PrivacySettings } from '../models/PrivacySettings';
+
+export const profileController = {
+  // GET /api/profile/me - Direct live query
+  async getMyProfile(_req: Request, res: Response) {
+    try {
+      const profile = await Profile.findOne({ id: 'usr_me_01' }).lean();
+      const privacy = await PrivacySettings.findOne({ userId: 'usr_me_01' }).lean();
+      
+      if (!profile) {
+        return res.status(404).json({ success: false, message: 'Profile not found' });
+      }
+
+      res.json({
+        success: true,
+        data: profile,
+        privacy: privacy || {},
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  // PATCH /api/profile/me
+  async updateMyProfile(req: Request, res: Response) {
+    try {
+      const updateData = req.body;
+
+      // Server-side 18+ Age & DOB validation
+      if (updateData.age !== undefined && Number(updateData.age) < 18) {
+        return res.status(400).json({
+          success: false,
+          message: 'You must be at least 18 years old to create a profile on Milan AI.',
+        });
+      }
+
+      if (updateData.dob && typeof updateData.dob === 'string') {
+        const parts = updateData.dob.split('-');
+        if (parts.length === 3) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10) - 1;
+          const d = parseInt(parts[2], 10);
+          const today = new Date();
+          let age = today.getFullYear() - y;
+          const monthDiff = today.getMonth() - m;
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < d)) {
+            age--;
+          }
+          if (age < 18) {
+            return res.status(400).json({
+              success: false,
+              message: `You must be at least 18 years old to use Milan AI (Age: ${age} yrs).`,
+            });
+          }
+        }
+      }
+
+      // Server-side Email Format Validation
+      if (updateData.email !== undefined) {
+        const emailStr = String(updateData.email).trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailStr || !emailRegex.test(emailStr)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Please provide a valid email address (e.g. name@example.com).',
+          });
+        }
+      }
+
+      const updated = await Profile.findOneAndUpdate(
+        { id: 'usr_me_01' },
+        { $set: updateData },
+        { returnDocument: 'after', upsert: true }
+      );
+
+      res.json({
+        success: true,
+        data: updated,
+        message: 'Profile updated in MongoDB successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  // PATCH /api/profile/privacy
+  async updatePrivacySettings(req: Request, res: Response) {
+    try {
+      const updateData = req.body;
+      const targetUserId = (req as any).user?.id || 'usr_me_01';
+
+      const updated = await PrivacySettings.findOneAndUpdate(
+        { userId: targetUserId },
+        { $set: updateData },
+        { returnDocument: 'after', upsert: true }
+      );
+
+      res.json({
+        success: true,
+        data: updated,
+        message: 'Privacy settings updated successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  // PUT /api/profile/vectors
+  async updateCoreValues(req: Request, res: Response) {
+    try {
+      const { coreValues, userId } = req.body;
+      const targetId = userId || (req as any).user?.id || 'usr_me_01';
+
+      const updated = await Profile.findOneAndUpdate(
+        { $or: [{ id: targetId }, { id: 'usr_me_01' }] },
+        { $set: { coreValues } },
+        { returnDocument: 'after', upsert: true }
+      );
+
+      res.json({
+        success: true,
+        data: updated?.coreValues || coreValues,
+        message: 'Mindful Match Vectors saved successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  // POST /api/profile/generate-bio
+  async generateBio(req: Request, res: Response) {
+    try {
+      const { aiBioService } = await import('../services/aiBioService');
+      const { name, occupation, city, interests, tone, coreValues, lookingFor } = req.body;
+      const result = await aiBioService.generateBio({
+        name,
+        occupation,
+        city,
+        interests,
+        tone,
+        coreValues,
+        lookingFor,
+      });
+
+      res.json({
+        success: true,
+        data: result,
+        message: 'Bio generated by AI successfully',
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  // GET /api/profile/photo/:filename - Authenticated & Protected Photo Streaming
+  async getProtectedPhoto(req: Request, res: Response) {
+    try {
+      const { filename } = req.params;
+      const fs = await import('fs');
+      const path = await import('path');
+
+      // Sanitize filename to prevent directory traversal
+      const safeFilename = path.basename(filename);
+      const photoPath = path.resolve(process.cwd(), 'server/public/avatars', safeFilename);
+
+      if (!fs.existsSync(photoPath)) {
+        return res.status(404).json({ success: false, message: 'Photo not found' });
+      }
+
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Cache-Control', 'private, max-age=86400');
+      fs.createReadStream(photoPath).pipe(res);
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+
+  // POST /api/profile/heartbeat - Updates real-time online presence
+  async heartbeat(req: Request, res: Response) {
+    try {
+      const userId = req.body?.userId || 'usr_me_01';
+      await Profile.updateOne({ id: userId }, { $set: { lastActive: new Date() } });
+      res.json({ success: true, timestamp: new Date().toISOString() });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  },
+};

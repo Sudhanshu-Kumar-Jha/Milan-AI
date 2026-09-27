@@ -9,16 +9,47 @@ import { matchRouter } from './routes/matchRoutes';
 import { chatRouter } from './routes/chatRoutes';
 import { subscriptionRouter } from './routes/subscriptionRoutes';
 import { adminRouter } from './routes/adminRoutes';
+import { configRouter } from './routes/configRoutes';
+import { notificationRouter } from './routes/notificationRoutes';
+import { postRouter } from './routes/postRoutes';
 import { Profile } from './models/Profile';
+import { apiRateLimiter } from './middleware/rateLimiter';
+
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import compression from 'compression';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = parseInt(process.env.PORT || '5000', 10);
+const HOST = '0.0.0.0';
+
+// High-performance gzip/deflate compression
+app.use(compression());
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '5mb' }));
+
+// Global load protection rate limiter for API requests
+app.use('/api', apiRateLimiter);
+
+// Prevent caching on API endpoints so client always receives 100% live presence and messages
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
+// Serve local static assets (avatars & images hosted strictly on our server)
+app.use('/avatars', express.static(path.join(__dirname, 'public/avatars')));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Health & System Status Endpoint
 app.get('/api/health', (_req, res) => {
@@ -39,6 +70,9 @@ app.use('/api/matches', matchRouter);
 app.use('/api/chat', chatRouter);
 app.use('/api/subscriptions', subscriptionRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/config', configRouter);
+app.use('/api/notifications', notificationRouter);
+app.use('/api/posts', postRouter);
 
 // Start Server & Connect MongoDB
 async function startServer() {
@@ -51,9 +85,9 @@ async function startServer() {
     }
   }
 
-  app.listen(PORT, () => {
+  app.listen(PORT, HOST, () => {
     console.log(`\n==============================================`);
-    console.log(`🚀 MilanAI MongoDB Backend Running on port ${PORT}`);
+    console.log(`🚀 Milan AI MongoDB Backend Running on http://${HOST}:${PORT}`);
     console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
     console.log(`==============================================\n`);
   });

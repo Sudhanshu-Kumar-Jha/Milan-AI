@@ -1,82 +1,103 @@
-# Milan AI — Backend Agent & Architecture Specification
+# Milan AI — Backend Architecture & Agent Specification
 
-This document provides system instructions, agent protocols, and operational workflows for the Milan AI Backend Engine.
+This document provides system instructions, agent protocols, and operational workflows for the Milan AI Backend Engine (`server/`).
 
 ---
 
 ## 1. System Architecture & Tech Stack
 - **Runtime**: Node.js (ES Modules, TypeScript via `tsx`)
 - **Web Framework**: Express 5.x
-- **Database**: MongoDB with Mongoose ODM
-- **Local SMTP / Email**: Nodemailer + MailHog (SMTP on port `1025`, Web UI on port `8025`)
-- **Default Port**: `5000` (`http://localhost:5000/api`)
+- **Database**: MongoDB with Mongoose ODM (`mongodb://127.0.0.1:27017/milanai`)
+- **Caching Layer**: In-Memory TTL Cache (`server/utils/cache.ts`) with smart prefix invalidation on mutations (zero stale cache on chat, profile, or matches).
+- **Online Presence & Heartbeat**: Real-time heartbeat tracking (`/api/profile/heartbeat`) updating active timestamp and computing exact online status ($\le 3$ minutes).
+- **Load Protection**: Token Bucket Rate Limiting middleware (`server/middleware/rateLimiter.ts`).
+- **Local Static Assets**: Express static middleware serves self-hosted profile avatars and user moments from `server/public/avatars/` on `/avatars/...`.
+- **Local SMTP / Email**: Nodemailer + MailHog & Gmail Production SMTP (`no.reply.milanai@gmail.com`).
+- **Default Port**: `5000` (`http://localhost:5000/api`).
 
 ---
 
-## 2. Agent Specifications
+## 2. Core Agent Specifications
 
-### A. Matchmaking Synergy Agent (`MilanMatchEngine`)
-- **Goal**: Evaluate 5-dimensional compatibility vectors for long-term matrimonial compatibility.
-- **5-Dimensional Vector Model**:
-  1. `Family Values & Tradition` (Default Weight: 40%)
-  2. `Career & Ambition Drive` (Default Weight: 30%)
-  3. `Financial Prudence & Goals` (Default Weight: 20%)
-  4. `Spontaneity & Adventure` (Default Weight: 5%)
-  5. `Emotional Expressiveness` (Default Weight: 5%)
-- **Dynamic Scoring Formula**:
-  $$\text{Synergy} = \sum_{i=1}^5 w_i \times (10 - |\vec{v}_{1,i} - \vec{v}_{2,i}|) \times 10$$
-- **Configurable Weights**: Maintained in MongoDB collection `AlgorithmWeight` and tunable via `PUT /api/admin/algorithm/weights`.
-
----
-
-### B. Privacy Shield & PII Interception Agent (`PrivacyShield`)
-- **Goal**: Detect and mask sensitive Personally Identifiable Information (phone numbers, personal emails, physical addresses) in chat messages prior to mutual identity verification.
-- **Interception Logic**:
-  - **Phone Regex**: `(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}|\b\d{10}\b`
-  - **Email Regex**: `[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`
-- **Action**: Intercepted messages are flagged with `safetyFlagged: true` and logged to `AnalyticsEvent` moderation queue.
+### A. 5D Matchmaking Synergy Engine (`MilanMatchEngine`)
+- **Location**: `server/services/aiMatchEngine.ts` and `server/controllers/matchController.ts`
+- **Model**:
+  - `Core Values Alignment` (35%): Family values, career ambition, financial outlook, spontaneity, emotional expressiveness.
+  - `Lifestyle Harmony` (25%): Dietary habits, smoking, drinking, pet preferences, sleep schedules.
+  - `Interests Synergy` (20%): Exact and fuzzy passion matching.
+  - `Relationship Goals & Identity Verification` (20%): Marital intention and camera-verified badge status.
+- **Endpoints**:
+  - `GET /api/matches/feed`: Scored discovery candidates sorted by compatibility with 60s TTL cache & `forceRefresh` support.
+  - `GET /api/matches/recommendations`: Real-time auto-refreshed recommendations with $\ge 85\%$ synergy.
+  - `POST /api/matches/test-algorithm`: Live sandbox testing endpoint to compare custom vector profiles.
+  - `POST /api/matches/action`: Records swipe decisions, creates mutual match records, and invalidates feed cache.
 
 ---
 
-### C. Authentication & MailHog Local Email Agent
-- **Identifier**: `email` (e.g. `aarav.sharma@milanai.com`)
-- **Email Masking**: Encrypts and masks email addresses across public feeds (e.g. `aa***@milanai.com`).
-- **Nodemailer Transport**: Dispatches dark-themed responsive verification emails to `localhost:1025`.
-- **Default PIN**: `123456` with 5-minute expiry tag.
+### B. Real-Time Chat & Unread Engine (`ChatEngine`)
+- **Location**: `server/controllers/chatController.ts` and `server/models/Message.ts`
+- **Features**:
+  - Dynamic unread count aggregation (`unreadCount = Message.countDocuments({ matchId, senderId: { $ne: userId }, isRead: false })`).
+  - Read receipt acknowledgment endpoint: `PATCH /api/chat/conversations/:matchId/read`.
+  - Privacy Shield scanner detecting direct phone/email sharing before contact release.
+  - WhatsApp-style multiline text and media dispatches with instant cache invalidation.
+  - Precise message alignment: Sent messages right-aligned (`justify-end`), received messages left-aligned (`justify-start`).
 
 ---
 
-## 3. Core API Endpoints
+### C. Profile & Instagram Moments Photo System
+- **Location**: `server/controllers/profileController.ts` and `server/models/Profile.ts`
+- **Features**:
+  - Multi-photo profile moments grid with instant updates via `PATCH /api/profile/me`.
+  - Real-time heartbeat keeping user online status current: `POST /api/profile/heartbeat`.
 
-| Endpoint | Method | Purpose |
+---
+
+### D. Rate Limiting & Load Balancing (`RateLimiter`)
+- **Location**: `server/middleware/rateLimiter.ts`
+- **Configuration**:
+  - Global API Limiter: 180 req/min per client IP.
+  - Strict Limiter: 40 req/min for OTP and swipe actions.
+  - Standard headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, `Retry-After`.
+
+---
+
+## 3. Complete API Catalog
+
+| Route | Method | Purpose |
 | :--- | :--- | :--- |
-| `/api/health` | GET | MongoDB & Server live connection health check |
-| `/api/auth/otp/send` | POST | Dispatches OTP email to MailHog |
-| `/api/auth/otp/verify` | POST | Verifies OTP and returns JWT + user profile |
-| `/api/profile/me` | GET / PATCH | Retrieves or updates current user profile |
-| `/api/profile/vectors` | PUT | Synchronizes 5D core value vectors |
-| `/api/matches/feed` | GET | Retrieves discovery candidates with AI highlights |
-| `/api/matches/action` | POST | Records swipe action (`like`, `pass`, `superlike`) |
-| `/api/chat/conversations` | GET | Lists mutual matches and chat threads |
-| `/api/chat/messages` | POST | Sends message with real-time Privacy Shield scan |
-| `/api/subscriptions/tiers` | GET | Catalogs premium subscription tiers |
-| `/api/subscriptions/checkout`| POST | Processes instant sandbox upgrade |
-| `/api/admin/algorithm/weights`| GET / PUT | Admin algorithm weight management |
-| `/api/admin/moderation/queue`| GET | Lists PII safety interception events |
+| `/api/health` | GET | Server and MongoDB connection status |
+| `/api/auth/otp/send` | POST | Dispatches 6-digit OTP email |
+| `/api/auth/otp/verify` | POST | Verifies OTP and returns JWT token |
+| `/api/profile/me` | GET / PATCH | Fetches or updates current user profile & photos |
+| `/api/profile/heartbeat` | POST | Heartbeat presence tracker |
+| `/api/profile/vectors` | PUT | Updates 5D core value vectors |
+| `/api/profile/photo/:filename` | GET | Protected authenticated photo streaming |
+| `/api/matches/feed` | GET | Discovery candidates feed (Cached, supports `?forceRefresh=true`) |
+| `/api/matches/recommendations` | GET | Automated high-synergy recommendations |
+| `/api/matches/test-algorithm` | POST | Sandbox matching algorithm tester |
+| `/api/matches/action` | POST | Processes swipe action (`accepted`, `rejected`, `superlike`, `skip`) |
+| `/api/chat/conversations` | GET | Lists mutual matches, unread counts, and last messages |
+| `/api/chat/conversations/:matchId/read` | PATCH | Marks unread messages in conversation as read |
+| `/api/chat/messages` | POST | Dispatches WhatsApp-style multiline text/image message |
+| `/api/notifications` | GET | User in-app notifications |
+| `/api/notifications/:id/read` | PATCH | Marks single notification as read |
+| `/api/notifications/read-all` | PATCH | Marks all notifications as read |
+| `/api/notifications/stream` | GET | Server-Sent Events (SSE) live push stream |
+| `/api/subscriptions/tiers` | GET | Premium tier perks matrix |
+| `/api/admin/algorithm/weights` | GET / PUT | Admin algorithm weight management |
+| `/api/admin/moderation/queue` | GET | Lists intercepted PII events |
 
 ---
 
-## 4. How to Run Backend Locally
+## 4. Operational Commands
 ```bash
-# 1. Install dependencies
-npm install
+# Start backend server
+npm run server
 
-# 2. Start MailHog (SMTP 1025, Web UI 8025)
-npm run mailhog
-
-# 3. Seed MongoDB with demo profiles
+# Re-seed MongoDB with verified multi-city profiles & local avatars
 npm run seed
 
-# 4. Start backend API server
-npm run server
+# Run MailHog local SMTP binary
+npm run mailhog
 ```

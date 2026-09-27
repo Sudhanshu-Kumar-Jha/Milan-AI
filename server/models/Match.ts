@@ -43,4 +43,8 @@ const MatchSchema = new Schema<IMatch>(
   { timestamps: true }
 );
 
+MatchSchema.index({ status: 1 });
+MatchSchema.index({ candidateId: 1, status: 1 });
+MatchSchema.index({ userId1: 1, userId2: 1 });
+
 export const Match = mongoose.models.Match || mongoose.model<IMatch>('Match', MatchSchema);

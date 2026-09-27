@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import path from 'path';
-import dns from 'node:dns/promises';
 
 export interface SendOtpEmailResult {
   success: boolean;
@@ -10,46 +9,23 @@ export interface SendOtpEmailResult {
   driver?: string;
 }
 
-/**
- * Resolve direct IPv4 address for Google SMTP to prevent container IPv6 ENETUNREACH
- */
-async function getSmtpIpv4(hostname: string): Promise<string> {
-  try {
-    const addresses = await dns.resolve4(hostname);
-    if (addresses && addresses.length > 0) {
-      return addresses[0];
-    }
-  } catch (err: any) {
-    console.warn(`[Mail Engine] DNS resolve4 for ${hostname} fallback: ${err.message}`);
-  }
-  // Public Google SMTP IPv4 fallback
-  return '64.233.184.108';
-}
-
-export async function createEmailTransporter(port = 465, isSecure = true) {
+export function createEmailTransporter() {
   dotenv.config({ path: path.resolve(process.cwd(), '.env'), override: true });
 
-  const hostname = process.env.MAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com';
-  const ipv4Host = await getSmtpIpv4(hostname);
   const user = process.env.MAIL_USERNAME || process.env.SMTP_USER || 'no.reply.milanai@gmail.com';
   const pass = process.env.MAIL_PASSWORD || process.env.SMTP_PASS || 'vacritkthmlhkqqk';
   const cleanPass = pass ? pass.replace(/\s+/g, '') : '';
 
+  // Nodemailer's native 'gmail' service handler manages ports, SSL, and network sockets reliably
   return nodemailer.createTransport({
-    host: ipv4Host, // Direct IPv4 socket eliminates IPv6 ENETUNREACH completely
-    port,
-    secure: isSecure,
+    service: 'gmail',
     auth: {
       user,
       pass: cleanPass,
     },
     tls: {
-      servername: hostname, // Enables strict SSL certificate matching for smtp.gmail.com
       rejectUnauthorized: false,
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 8000,
-    socketTimeout: 12000,
   });
 }
 
@@ -114,35 +90,20 @@ export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpE
     `,
   };
 
-  // Primary Attempt: Port 465 (SSL)
   try {
-    const primaryTransporter = await createEmailTransporter(465, true);
-    const info = await primaryTransporter.sendMail(mailOptions);
-    console.log(`📧 [Mail Engine] Real email successfully sent via Port 465 (IPv4) to ${email} (MessageId: ${info.messageId})`);
+    const transporter = createEmailTransporter();
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`📧 [Mail Engine] Real email successfully sent via Gmail Service to ${email} (MessageId: ${info.messageId})`);
     return {
       success: true,
       messageId: info.messageId,
-      driver: 'gmail-465',
+      driver: 'gmail',
     };
-  } catch (primaryError: any) {
-    console.warn(`⚠️ [Mail Engine] Port 465 attempt to ${email} encountered: ${primaryError.message}. Retrying via Port 587 STARTTLS...`);
-
-    // Secondary Attempt: Port 587 (STARTTLS)
-    try {
-      const fallbackTransporter = await createEmailTransporter(587, false);
-      const info = await fallbackTransporter.sendMail(mailOptions);
-      console.log(`📧 [Mail Engine] Real email successfully sent via Port 587 STARTTLS (IPv4) to ${email} (MessageId: ${info.messageId})`);
-      return {
-        success: true,
-        messageId: info.messageId,
-        driver: 'gmail-587',
-      };
-    } catch (fallbackError: any) {
-      console.error(`❌ [Mail Engine] Both SMTP attempts to ${email} failed: ${fallbackError.message}`);
-      return {
-        success: false,
-        error: `Email delivery failed: ${fallbackError.message}`,
-      };
-    }
+  } catch (error: any) {
+    console.error(`❌ [Mail Engine] Gmail delivery to ${email} failed: ${error.message}`);
+    return {
+      success: false,
+      error: `Email delivery failed: ${error.message}`,
+    };
   }
 }

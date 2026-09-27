@@ -57,21 +57,17 @@ app.use('/api', (_req, res, next) => {
 app.use('/avatars', express.static(path.join(__dirname, 'public/avatars')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
-// Serve compiled React frontend application (SPA)
-const webDistPath = path.resolve(__dirname, 'public/web');
-const appDistPath = path.resolve(__dirname, '../app/dist');
-const serverDistPath = path.resolve(__dirname, 'dist');
-const staticDistPath = fs.existsSync(webDistPath)
-  ? webDistPath
-  : fs.existsSync(appDistPath)
-  ? appDistPath
-  : fs.existsSync(serverDistPath)
-  ? serverDistPath
-  : null;
-
-if (staticDistPath) {
-  app.use(express.static(staticDistPath));
-}
+// Root welcome endpoint for Railway health monitoring & REST API status
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'Milan AI Production REST API',
+    status: 'online',
+    health: '/api/health',
+    version: '1.0.0',
+    database: isDbConnected() ? 'connected' : 'connecting',
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // Health & System Status Endpoint for Railway & monitoring
 app.get('/api/health', (_req, res) => {
@@ -95,25 +91,6 @@ app.use('/api/admin', adminRouter);
 app.use('/api/config', configRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/posts', postRouter);
-
-// Fallback: Serve React SPA index.html for all page routes or API status if frontend not present
-app.use((req, res, next) => {
-  if (req.method !== 'GET') return next();
-  if (req.path.startsWith('/api') || req.path.startsWith('/avatars') || req.path.startsWith('/public')) {
-    return next();
-  }
-  if (staticDistPath && fs.existsSync(path.join(staticDistPath, 'index.html'))) {
-    return res.sendFile(path.join(staticDistPath, 'index.html'));
-  }
-  res.json({
-    name: 'Milan AI Production REST API',
-    status: 'online',
-    health: '/api/health',
-    version: '1.0.0',
-    database: isDbConnected() ? 'connected' : 'connecting',
-    timestamp: new Date().toISOString(),
-  });
-});
 
 // Start Server & Connect MongoDB (Non-blocking so HTTP proxy binds in <10ms)
 app.listen(PORT, HOST, () => {

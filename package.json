@@ -5,12 +5,12 @@
   "type": "module",
   "main": "server/index.ts",
   "scripts": {
-    "start": "tsx server/index.ts",
+    "start": "npx tsx server/index.ts",
     "build": "echo Server build complete",
-    "server": "tsx server/index.ts",
-    "seed": "tsx server/seed.ts",
+    "server": "npx tsx server/index.ts",
+    "seed": "npx tsx server/seed.ts",
     "lint": "echo Lint complete",
-    "preview": "npm start"
+    "preview": "npx tsx server/index.ts"
   },
   "dependencies": {
     "@types/compression": "^1.8.1",

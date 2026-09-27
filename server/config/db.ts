@@ -1,3 +1,8 @@
+import crypto from 'node:crypto';
+if (typeof (globalThis as any).crypto === 'undefined') {
+  (globalThis as any).crypto = crypto;
+}
+
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 

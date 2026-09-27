@@ -1,3 +1,8 @@
+import crypto from 'node:crypto';
+if (typeof (globalThis as any).crypto === 'undefined') {
+  (globalThis as any).crypto = crypto;
+}
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -87,8 +92,8 @@ async function startServer() {
 
   app.listen(PORT, HOST, () => {
     console.log(`\n==============================================`);
-    console.log(`🚀 Milan AI MongoDB Backend Running on http://${HOST}:${PORT}`);
-    console.log(`📡 Health Check: http://localhost:${PORT}/api/health`);
+    console.log(`🚀 Milan AI Backend Server Listening on port ${PORT} (${HOST})`);
+    console.log(`📡 Health Check Ready: /api/health`);
     console.log(`==============================================\n`);
   });
 }

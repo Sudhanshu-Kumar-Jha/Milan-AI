@@ -36,21 +36,7 @@ export const authController = {
         email: { $regex: new RegExp(`^${normalizedEmail.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}$`, 'i') }
       });
 
-      if (purpose === 'login') {
-        if (!existingUser) {
-          return res.status(404).json({
-            success: false,
-            message: `No account found for "${normalizedEmail}". Please create an account to get started.`,
-          });
-        }
-      } else if (purpose === 'signup') {
-        if (existingUser) {
-          return res.status(409).json({
-            success: false,
-            message: `An account with "${normalizedEmail}" already exists. Please sign in instead.`,
-          });
-        }
-      }
+      const isExistingUser = !!existingUser;
 
       const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
       
@@ -76,6 +62,7 @@ export const authController = {
           sessionId,
           expiresInSeconds: 300,
           emailSent: emailResult.success,
+          isExistingUser,
           backupOtp: emailResult.success ? undefined : otp,
         },
         message: emailResult.success

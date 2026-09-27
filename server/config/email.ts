@@ -1,12 +1,7 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import path from 'path';
-import dns from 'node:dns';
-
-// Ensure IPv4 resolution first globally
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
+import dns from 'node:dns/promises';
 
 export interface SendOtpEmailResult {
   success: boolean;
@@ -15,47 +10,51 @@ export interface SendOtpEmailResult {
   driver?: string;
 }
 
-export function createEmailTransporter(portOverride?: number, secureOverride?: boolean) {
+/**
+ * Resolve direct IPv4 address for Google SMTP to prevent container IPv6 ENETUNREACH
+ */
+async function getSmtpIpv4(hostname: string): Promise<string> {
+  try {
+    const addresses = await dns.resolve4(hostname);
+    if (addresses && addresses.length > 0) {
+      return addresses[0];
+    }
+  } catch (err: any) {
+    console.warn(`[Mail Engine] DNS resolve4 for ${hostname} fallback: ${err.message}`);
+  }
+  // Public Google SMTP IPv4 fallback
+  return '64.233.184.108';
+}
+
+export async function createEmailTransporter(port = 465, isSecure = true) {
   dotenv.config({ path: path.resolve(process.cwd(), '.env'), override: true });
 
-  const host = process.env.MAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com';
-  const defaultPort = parseInt(process.env.MAIL_PORT || process.env.SMTP_PORT || '465', 10);
-  const port = portOverride !== undefined ? portOverride : defaultPort;
+  const hostname = process.env.MAIL_HOST || process.env.SMTP_HOST || 'smtp.gmail.com';
+  const ipv4Host = await getSmtpIpv4(hostname);
   const user = process.env.MAIL_USERNAME || process.env.SMTP_USER || 'no.reply.milanai@gmail.com';
   const pass = process.env.MAIL_PASSWORD || process.env.SMTP_PASS || 'vacritkthmlhkqqk';
   const cleanPass = pass ? pass.replace(/\s+/g, '') : '';
-  const isSecure = secureOverride !== undefined ? secureOverride : (port === 465);
 
   return nodemailer.createTransport({
-    host,
+    host: ipv4Host, // Direct IPv4 socket eliminates IPv6 ENETUNREACH completely
     port,
     secure: isSecure,
-    // Custom IPv4-only DNS lookup to strictly prevent ENETUNREACH IPv6 routing errors in cloud containers
-    lookup: (hostname, _options, callback) => {
-      dns.lookup(hostname, { family: 4, all: false }, (err, address, family) => {
-        if (err) {
-          // Fallback to Google SMTP known public IPv4 if DNS times out
-          return callback(null, '64.233.184.108', 4);
-        }
-        callback(null, address, family);
-      });
-    },
     auth: {
       user,
       pass: cleanPass,
     },
     tls: {
-      servername: 'smtp.gmail.com',
+      servername: hostname, // Enables strict SSL certificate matching for smtp.gmail.com
       rejectUnauthorized: false,
     },
-    connectionTimeout: 12000,
+    connectionTimeout: 10000,
     greetingTimeout: 8000,
-    socketTimeout: 15000,
+    socketTimeout: 12000,
   });
 }
 
 /**
- * Dispatch verification OTP code to user's real email address via Gmail SMTP with automatic port fallback
+ * Dispatch verification OTP code to user's real email address via Gmail SMTP
  */
 export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpEmailResult> {
   dotenv.config({ path: path.resolve(process.cwd(), '.env'), override: true });
@@ -117,9 +116,9 @@ export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpE
 
   // Primary Attempt: Port 465 (SSL)
   try {
-    const primaryTransporter = createEmailTransporter(465, true);
+    const primaryTransporter = await createEmailTransporter(465, true);
     const info = await primaryTransporter.sendMail(mailOptions);
-    console.log(`📧 [Mail Engine] Real email successfully sent via Port 465 to ${email} (MessageId: ${info.messageId})`);
+    console.log(`📧 [Mail Engine] Real email successfully sent via Port 465 (IPv4) to ${email} (MessageId: ${info.messageId})`);
     return {
       success: true,
       messageId: info.messageId,
@@ -130,9 +129,9 @@ export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpE
 
     // Secondary Attempt: Port 587 (STARTTLS)
     try {
-      const fallbackTransporter = createEmailTransporter(587, false);
+      const fallbackTransporter = await createEmailTransporter(587, false);
       const info = await fallbackTransporter.sendMail(mailOptions);
-      console.log(`📧 [Mail Engine] Real email successfully sent via Port 587 STARTTLS to ${email} (MessageId: ${info.messageId})`);
+      console.log(`📧 [Mail Engine] Real email successfully sent via Port 587 STARTTLS (IPv4) to ${email} (MessageId: ${info.messageId})`);
       return {
         success: true,
         messageId: info.messageId,

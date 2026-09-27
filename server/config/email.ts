@@ -9,16 +9,17 @@ export interface SendOtpEmailResult {
   driver?: string;
 }
 
-export function createEmailTransporter() {
+export function createEmailTransporter(port = 465, secure = true) {
   dotenv.config({ path: path.resolve(process.cwd(), '.env'), override: true });
 
   const user = process.env.MAIL_USERNAME || process.env.SMTP_USER || 'no.reply.milanai@gmail.com';
   const pass = process.env.MAIL_PASSWORD || process.env.SMTP_PASS || 'vacritkthmlhkqqk';
   const cleanPass = pass ? pass.replace(/\s+/g, '') : '';
 
-  // Nodemailer's native 'gmail' service handler manages ports, SSL, and network sockets reliably
   return nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port,
+    secure,
     auth: {
       user,
       pass: cleanPass,
@@ -26,11 +27,16 @@ export function createEmailTransporter() {
     tls: {
       rejectUnauthorized: false,
     },
-  });
+    // Force IPv4 only - eliminates ENETUNREACH 2607:... IPv6 routing failures on cloud hosts
+    family: 4,
+    connectionTimeout: 4000,
+    greetingTimeout: 3500,
+    socketTimeout: 4500,
+  } as any);
 }
 
 /**
- * Dispatch verification OTP code to user's real email address via Gmail SMTP
+ * Dispatch verification OTP code with strict IPv4 forcing and timeout protection
  */
 export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpEmailResult> {
   dotenv.config({ path: path.resolve(process.cwd(), '.env'), override: true });
@@ -90,20 +96,41 @@ export async function sendOtpEmail(email: string, otp: string): Promise<SendOtpE
     `,
   };
 
+  // 1. Try Port 465 (SSL)
   try {
-    const transporter = createEmailTransporter();
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 [Mail Engine] Real email successfully sent via Gmail Service to ${email} (MessageId: ${info.messageId})`);
+    const transporter465 = createEmailTransporter(465, true);
+    const info = await Promise.race([
+      transporter465.sendMail(mailOptions),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('SMTP Port 465 timeout')), 3500)),
+    ]);
+    console.log(`📧 [Mail Engine] Real email successfully sent to ${email} via Port 465 (MessageId: ${(info as any)?.messageId})`);
     return {
       success: true,
-      messageId: info.messageId,
-      driver: 'gmail',
+      messageId: (info as any)?.messageId,
+      driver: 'gmail-465',
     };
-  } catch (error: any) {
-    console.error(`❌ [Mail Engine] Gmail delivery to ${email} failed: ${error.message}`);
+  } catch (err465: any) {
+    console.warn(`⚠️ [Mail Engine] Port 465 attempt failed (${err465.message}), trying Port 587 STARTTLS...`);
+  }
+
+  // 2. Fallback to Port 587 (STARTTLS)
+  try {
+    const transporter587 = createEmailTransporter(587, false);
+    const info = await Promise.race([
+      transporter587.sendMail(mailOptions),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('SMTP Port 587 timeout')), 3500)),
+    ]);
+    console.log(`📧 [Mail Engine] Real email successfully sent to ${email} via Port 587 (MessageId: ${(info as any)?.messageId})`);
+    return {
+      success: true,
+      messageId: (info as any)?.messageId,
+      driver: 'gmail-587',
+    };
+  } catch (err587: any) {
+    console.warn(`⚠️ [Mail Engine] Direct SMTP dispatch unreachable on cloud container (${err587.message}).`);
     return {
       success: false,
-      error: `Email delivery failed: ${error.message}`,
+      error: err587.message,
     };
   }
 }

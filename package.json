@@ -6,7 +6,7 @@
   "main": "server/index.ts",
   "scripts": {
     "start": "npx tsx server/index.ts",
-    "build": "echo Server build complete",
+    "build": "npm --prefix app install && npm --prefix app run build",
     "server": "npx tsx server/index.ts",
     "seed": "npx tsx server/seed.ts",
     "lint": "echo Lint complete",
@@ -42,6 +42,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.5",
     "oxlint": "^1.81.0",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.0"
   }

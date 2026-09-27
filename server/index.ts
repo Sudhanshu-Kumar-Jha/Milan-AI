@@ -56,6 +56,18 @@ app.use('/api', (_req, res, next) => {
 app.use('/avatars', express.static(path.join(__dirname, 'public/avatars')));
 app.use('/public', express.static(path.join(__dirname, 'public')));
 
+// Root welcome endpoint for Railway health monitoring
+app.get('/', (_req, res) => {
+  res.json({
+    name: 'Milan AI Production REST API',
+    status: 'online',
+    health: '/api/health',
+    version: '1.0.0',
+    database: isDbConnected() ? 'connected' : 'connecting',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health & System Status Endpoint
 app.get('/api/health', (_req, res) => {
   const dbStatus = isDbConnected();
@@ -79,23 +91,26 @@ app.use('/api/config', configRouter);
 app.use('/api/notifications', notificationRouter);
 app.use('/api/posts', postRouter);
 
-// Start Server & Connect MongoDB
-async function startServer() {
-  const connected = await connectDB();
-  if (connected) {
-    const profileCount = await Profile.countDocuments();
-    if (profileCount === 0) {
-      console.log('🔄 Initializing MongoDB seed data...');
-      await seedDatabase();
+// Start Server & Connect MongoDB (Non-blocking so HTTP proxy binds in <10ms)
+app.listen(PORT, HOST, () => {
+  console.log(`\n==============================================`);
+  console.log(`🚀 Milan AI Backend Server Listening on port ${PORT} (${HOST})`);
+  console.log(`📡 Health Check Ready: /api/health`);
+  console.log(`==============================================\n`);
+
+  connectDB().then(async (connected) => {
+    if (connected) {
+      try {
+        const profileCount = await Profile.countDocuments();
+        if (profileCount === 0) {
+          console.log('🔄 Initializing MongoDB seed data...');
+          await seedDatabase();
+        }
+      } catch (err: any) {
+        console.error(`⚠️ Seed check failed: ${err.message}`);
+      }
     }
-  }
-
-  app.listen(PORT, HOST, () => {
-    console.log(`\n==============================================`);
-    console.log(`🚀 Milan AI Backend Server Listening on port ${PORT} (${HOST})`);
-    console.log(`📡 Health Check Ready: /api/health`);
-    console.log(`==============================================\n`);
+  }).catch((err) => {
+    console.error(`❌ Background DB connection failed: ${err.message}`);
   });
-}
-
-startServer();
+});

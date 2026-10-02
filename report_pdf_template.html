@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Milan AI — Project Proposal & Vendor Costing Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    @page {
+      size: A4 portrait;
+      margin: 14mm 14mm 16mm 14mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 8pt;
+        color: #64748b;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #070b12;
+      color: #e2e8f0;
+      font-size: 9pt;
+      line-height: 1.55;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .page {
+      page-break-after: always;
+      position: relative;
+      min-height: 100%;
+      padding-bottom: 20px;
+    }
+    .page:last-child {
+      page-break-after: avoid;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      color: #ffffff;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #FF007F 0%, #FF5E97 45%, #8B35FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .gold-text {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-size: 7pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border: 1px solid rgba(255, 0, 127, 0.4);
+      background: rgba(255, 0, 127, 0.12);
+      color: #ff66b2;
+    }
+
+    .badge-teal {
+      border-color: rgba(0, 245, 212, 0.4);
+      background: rgba(0, 245, 212, 0.12);
+      color: #00f5d4;
+    }
+
+    .badge-gold {
+      border-color: rgba(251, 191, 36, 0.4);
+      background: rgba(251, 191, 36, 0.12);
+      color: #fbbf24;
+    }
+
+    .card {
+      background: #0c1220;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .card-glass {
+      background: linear-gradient(135deg, rgba(16, 24, 40, 0.8) 0%, rgba(12, 18, 32, 0.95) 100%);
+      border: 1px solid rgba(255, 0, 127, 0.25);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header-brand {
+      font-size: 13pt;
+      font-weight: 900;
+    }
+
+    .header-tagline {
+      font-size: 7.5pt;
+      color: #94a3b8;
+    }
+
+    .section-title {
+      font-size: 13.5pt;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-desc {
+      font-size: 8.5pt;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8pt;
+      margin: 8px 0;
+    }
+
+    th {
+      background: #111827;
+      color: #f8fafc;
+      text-align: left;
+      padding: 6px 8px;
+      font-weight: 700;
+      border: 1px solid #1f2937;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    td {
+      padding: 5.5px 8px;
+      border: 1px solid #1e293b;
+      color: #cbd5e1;
+    }
+
+    tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .code-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7pt;
+      background: #050811;
+      border: 1px solid #1e293b;
+      padding: 10px;
+      border-radius: 8px;
+      color: #38bdf8;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      margin-bottom: 5px;
+      font-size: 8pt;
+    }
+
+    .check-icon {
+      color: #FF007F;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .diagram-box {
+      background: #050811;
+      border: 1px solid rgba(255, 0, 127, 0.25);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 8px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.5pt;
+      color: #cbd5e1;
+      line-height: 1.45;
+    }
+
+    .cover-hero {
+      padding: 28px 20px 22px 20px;
+      text-align: center;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 0, 127, 0.18) 0%, rgba(139, 53, 255, 0.08) 50%, rgba(7, 11, 18, 0) 80%);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 0, 127, 0.3);
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= PAGE 1: COVER & EXECUTIVE SUMMARY ================= -->
+  <div class="page">
+    <div class="header-bar">
+      <div>
+        <div class="header-brand"><span class="gradient-text">✨ Milan AI</span></div>
+        <div class="header-tagline">Mindful Matrimony & AI Compatibility Platform</div>
+      </div>
+      <div>
+        <span class="badge">Master Project Proposal & Procurement Package</span>
+      </div>
+    </div>
+
+    <div class="cover-hero">
+      <div style="margin-bottom: 6px;">
+        <span class="badge badge-teal">Production Ready • Architecture & Costing Report</span>
+      </div>
+      <h1 style="font-size: 23pt; margin-bottom: 6px;">
+        Milan <span class="gradient-text">AI</span> Comprehensive Report
+      </h1>
+      <p style="font-size: 10pt; color: #cbd5e1; max-width: 580px; margin: 0 auto 12px auto;">
+        Technical Architecture, Market R&D, Procurement Costing, and GST Invoicing Guidelines.
+      </p>
+
+      <div class="grid-4" style="max-width: 600px; margin: 0 auto; text-align: center;">
+        <div class="card" style="padding: 8px;">
+          <div style="font-size: 14pt; font-weight: 900; color: #ff007f;">100%</div>
+          <div style="font-size: 6.5pt; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Anti-Catfish Camera</div>
+        </div>
+        <div class="card" style="padding: 8px;">
+          <div style="font-size: 14pt; font-weight: 900; color: #00f5d4;">5-Axis</div>
+          <div style="font-size: 6.5pt; color: #94a3b8; font-weight: 700; text-transform: uppercase;">Values Radar Matrix</div>
+        </div>
+        <div class="card" style="padding: 8px;">
+          <div style="font-size: 14pt; font-weight: 900; color: #fbbf24;">₹85.00</div>
+          <div style="font-size: 6.5pt; color: #94a3b8; font-weight: 700; text-transform: uppercase;">USD Benchmark</div>
+        </div>
+        <div class="card" style="padding: 8px;">
+          <div style="font-size: 14pt; font-weight: 900; color: #a78bfa;">18% GST</div>
+          <div style="font-size: 6.5pt; color: #94a3b8; font-weight: 700; text-transform: uppercase;">SAC 998314/15</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="section-title">1. Executive Summary & Value Proposition</h2>
+    <p class="section-desc">
+      Milan AI disrupts the online matrimonial sector by eliminating fake profiles, catfishing, ghosting, and values misalignment.
+    </p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="font-size: 10pt; color: #ff66b2; margin-bottom: 6px;">🎯 Core Problems Solved</h3>
+        <div class="check-item"><span class="check-icon">✕</span><span><strong>Catfishing & Fake Uploads:</strong> Over 60% of traditional matrimony accounts use outdated or edited photos.</span></div>
+        <div class="check-item"><span class="check-icon">✕</span><span><strong>Superficial Swiping Fatigue:</strong> Unmatched life goals and values lead to instant ghosting.</span></div>
+        <div class="check-item"><span class="check-icon">✕</span><span><strong>Privacy Leaks:</strong> Contact details exposed to brokers and third-party marketers.</span></div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 10pt; color: #00f5d4; margin-bottom: 6px;">🛡️ Milan AI Solution & Defense</h3>
+        <div class="check-item"><span class="check-icon">✓</span><span><strong>Anti-Catfish Camera:</strong> Mandatory in-app real-time selfie snapshot with AI beauty filters.</span></div>
+        <div class="check-item"><span class="check-icon">✓</span><span><strong>5-Axis Core Values Radar:</strong> Family, Ambition, Finance, Spontaneity, and Expressiveness.</span></div>
+        <div class="check-item"><span class="check-icon">✓</span><span><strong>Masked Contact Privacy Shield:</strong> PII masked across all APIs (e.g. <code>am***@gmail.com</code>).</span></div>
+      </div>
+    </div>
+
+    <div class="card-glass" style="margin-top: 4px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <span style="font-size:7.5pt; font-weight:700; color:#94a3b8; text-transform:uppercase;">Live Production Railway Deployment:</span>
+          <div style="font-size:9.5pt; font-weight:800; color:#ffffff; font-family:monospace;">https://milan-ai-production.up.railway.app</div>
+        </div>
+        <span class="badge badge-teal">Status: Online 24/7</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 2: SYSTEM ARCHITECTURE & DATA FLOW ================= -->
+  <div class="page">
+    <div class="header-bar">
+      <div>
+        <div class="header-brand"><span class="gradient-text">✨ Milan AI</span></div>
+        <div class="header-tagline">System Architecture & Engineering Design</div>
+      </div>
+      <div>
+        <span class="badge">Technical Blueprint</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">2. Complete System Architecture & Data Flow</h2>
+    <p class="section-desc">
+      Enterprise full-stack architecture built with React 19, TypeScript, Node.js 24, MongoDB Atlas, and Railway Cloud.
+    </p>
+
+    <div class="diagram-box">
+┌──────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   MILAN AI CLIENT LAYER                                  │
+│   • Android APK Shell (React Native 0.86 / Expo)     • Web Application (React 19 / Vite) │
+└─────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │ HTTPS / WSS (Port 443)
+┌─────────────────────────────────────────────▼────────────────────────────────────────────┐
+│                             EDGE SECURITY & ROUTING GATEWAY                              │
+│   • Cloudflare Edge CDN & WAF (DDoS Mitigation)    • Express Rate Limiter (200 req/min)  │
+│   • Client Route Inspector: Mobile Native Client vs Desktop REST API Status              │
+└─────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │
+┌─────────────────────────────────────────────▼────────────────────────────────────────────┐
+│                               BACKEND SERVICES (NODE.JS 24)                              │
+│   • Auth & OTP Controller (JWT Tokens)             • Match Engine (5-Axis Values Matrix) │
+│   • Real-Time Chat & Messaging                     • Profile & AI Bio Generator Service  │
+│   • Dynamic Config & City Provider                 • Admin Telemetry & Moderation Engine │
+└──────────────────────┬──────────────────────┬──────────────────────┬─────────────────────┘
+                       │                      │                      │
+┌──────────────────────▼─────┐ ┌──────────────▼─────┐ ┌──────────────▼─────┐ ┌────────────▼─────┐
+│    MONGODB ATLAS CLUSTER   │ │ CLOUDFLARE R2 MEDIA│ │ TRANSACTIONAL MAIL │ │  GOOGLE GEMINI AI   │
+│ • Profiles & Matches       │ │ • Verified Photos  │ │ • Resend HTTPS API │ │ • Smart Bio Engine  │
+│ • Messages & Notifications │ │ • Avatar Assets    │ │ • IPv4 Forced SMTP │ │ • Match Alignment   │
+└────────────────────────────┘ └────────────────────┘ └────────────────────┘ └───────────────────┘
+    </div>
+
+    <h3 style="font-size: 10pt; margin-top: 10px; margin-bottom: 6px;">Core Subsystems & Module Audit</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Subsystem</th>
+          <th>File Location</th>
+          <th>Endpoints & Capabilities</th>
+          <th>Security & Verification</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Auth & OTP</strong></td>
+          <td><code>server/controllers/authController.ts</code></td>
+          <td><code>POST /api/auth/otp/send</code><br/><code>POST /api/auth/otp/verify</code></td>
+          <td>Dynamic 6-digit OTP, 5-min TTL map, JWT access tokens, auto-registration.</td>
+        </tr>
+        <tr>
+          <td><strong>Profile Engine</strong></td>
+          <td><code>server/controllers/profileController.ts</code></td>
+          <td><code>GET /api/profile/me</code><br/><code>POST /api/profile/generate-bio</code></td>
+          <td>Lifestyle tags, 4-tone AI bio generation (*Witty, Deep, Grounded, Short*).</td>
+        </tr>
+        <tr>
+          <td><strong>Match & Radar</strong></td>
+          <td><code>server/controllers/matchController.ts</code></td>
+          <td><code>GET /api/matches/discover</code><br/><code>POST /api/matches/action</code></td>
+          <td>Swipe deck, 5-axis values compatibility scoring (0–100%), mutual match triggers.</td>
+        </tr>
+        <tr>
+          <td><strong>Messaging</strong></td>
+          <td><code>server/controllers/chatController.ts</code></td>
+          <td><code>GET /api/chat/conversations</code><br/><code>POST /api/chat/send</code></td>
+          <td>Match-locked chat threads, unread counters, contact details masking.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ================= PAGE 3: VENDOR COSTING & PROCUREMENTS ================= -->
+  <div class="page">
+    <div class="header-bar">
+      <div>
+        <div class="header-brand"><span class="gradient-text">✨ Milan AI</span></div>
+        <div class="header-tagline">Vendor Pricing & Market Cost Valuation</div>
+      </div>
+      <div>
+        <span class="badge badge-gold">Procurement & Costing Package</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">3. Detailed Expense & Vendor Pricing Sheet</h2>
+    <p class="section-desc">
+      Verified publicly available market costs as of Q3/Q4 2026 for production operations (1 USD = ₹85.00 INR, GST @ 18%).
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Service / Component</th>
+          <th>Vendor / Provider</th>
+          <th>Plan & Capacity</th>
+          <th>Monthly Base</th>
+          <th>Annual Base</th>
+          <th>GST @ 18%</th>
+          <th>Annual Total (INR)</th>
+          <th>Billing Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Domain Name</strong></td>
+          <td>Cloudflare Registrar</td>
+          <td><code>.com</code> TLD (At-cost)</td>
+          <td>₹85.00</td>
+          <td>₹1,020.00</td>
+          <td>₹183.60</td>
+          <td><strong>₹1,203.60</strong></td>
+          <td>Cloudflare Official</td>
+        </tr>
+        <tr>
+          <td><strong>Application Server</strong></td>
+          <td>Railway Cloud</td>
+          <td>Pro Plan (8 GB RAM, 8 vCPU)</td>
+          <td>₹1,700.00</td>
+          <td>₹20,400.00</td>
+          <td>₹3,672.00</td>
+          <td><strong>₹24,072.00</strong></td>
+          <td>Railway.app Pricing</td>
+        </tr>
+        <tr>
+          <td><strong>Managed Database</strong></td>
+          <td>MongoDB Atlas</td>
+          <td>M10 Cluster (Multi-AZ Replica)</td>
+          <td>₹4,845.00</td>
+          <td>₹58,140.00</td>
+          <td>₹10,465.20</td>
+          <td><strong>₹68,605.20</strong></td>
+          <td>MongoDB Pricing</td>
+        </tr>
+        <tr>
+          <td><strong>Media Storage</strong></td>
+          <td>Cloudflare R2</td>
+          <td>50 GB (Zero Egress Fees)</td>
+          <td>₹255.00</td>
+          <td>₹3,060.00</td>
+          <td>₹550.80</td>
+          <td><strong>₹3,610.80</strong></td>
+          <td>Cloudflare R2</td>
+        </tr>
+        <tr>
+          <td><strong>CDN, WAF & SSL</strong></td>
+          <td>Cloudflare Pro</td>
+          <td>Pro Tier DDoS & WAF</td>
+          <td>₹1,700.00</td>
+          <td>₹20,400.00</td>
+          <td>₹3,672.00</td>
+          <td><strong>₹24,072.00</strong></td>
+          <td>Cloudflare Plans</td>
+        </tr>
+        <tr>
+          <td><strong>Transactional Email</strong></td>
+          <td>Resend.com / Brevo</td>
+          <td>Pro (50,000 emails/mo)</td>
+          <td>₹1,700.00</td>
+          <td>₹20,400.00</td>
+          <td>₹3,672.00</td>
+          <td><strong>₹24,072.00</strong></td>
+          <td>Resend Pricing</td>
+        </tr>
+        <tr>
+          <td><strong>SMS OTP Gateway</strong></td>
+          <td>MSG91 / Fast2SMS</td>
+          <td>10,000 SMS / Month Pack</td>
+          <td>₹1,800.00</td>
+          <td>₹21,600.00</td>
+          <td>₹3,888.00</td>
+          <td><strong>₹25,488.00</strong></td>
+          <td>MSG91 Official</td>
+        </tr>
+        <tr>
+          <td><strong>AI Bio & Matching API</strong></td>
+          <td>Google Gemini API</td>
+          <td>Gemini 1.5 Flash (1M tokens)</td>
+          <td>₹425.00</td>
+          <td>₹5,100.00</td>
+          <td>₹918.00</td>
+          <td><strong>₹6,018.00</strong></td>
+          <td>Google AI Pricing</td>
+        </tr>
+        <tr>
+          <td><strong>Error Tracing & APM</strong></td>
+          <td>Sentry.io</td>
+          <td>Team Tier (50k events/mo)</td>
+          <td>₹2,210.00</td>
+          <td>₹26,520.00</td>
+          <td>₹4,773.60</td>
+          <td><strong>₹31,293.60</strong></td>
+          <td>Sentry Pricing</td>
+        </tr>
+        <tr>
+          <td><strong>Google Play Store</strong></td>
+          <td>Google LLC</td>
+          <td>Developer License (One-Time)</td>
+          <td>—</td>
+          <td>₹2,125.00</td>
+          <td>₹382.50</td>
+          <td><strong>₹2,507.50</strong></td>
+          <td>Play Console Fee</td>
+        </tr>
+        <tr>
+          <td><strong>Apple Developer</strong></td>
+          <td>Apple Inc.</td>
+          <td>Annual Developer Program</td>
+          <td>—</td>
+          <td>₹8,415.00</td>
+          <td>₹1,514.70</td>
+          <td><strong>₹9,929.70</strong></td>
+          <td>Apple Developer</td>
+        </tr>
+        <tr style="background: rgba(255, 0, 127, 0.12); font-weight: 800;">
+          <td colspan="3"><strong>TOTAL PRODUCTION INFRASTRUCTURE</strong></td>
+          <td><strong>₹15,720.00</strong></td>
+          <td><strong>₹187,160.00</strong></td>
+          <td><strong>₹33,688.80</strong></td>
+          <td><strong>₹220,848.80</strong></td>
+          <td><strong>All Inclusive</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="grid-3" style="margin-top: 10px;">
+      <div class="card">
+        <h4 style="font-size: 8.5pt; color: #ff66b2;">Tier 1: MVP / Low-Cost</h4>
+        <div style="font-size: 11pt; font-weight: 900; color: #ffffff;">₹26,450 / yr</div>
+        <p style="font-size: 7.5pt; color: #94a3b8; margin-top: 2px;">Shared MongoDB + Free tiers + Railway Hobby.</p>
+      </div>
+      <div class="card">
+        <h4 style="font-size: 8.5pt; color: #00f5d4;">Tier 2: Standard Production</h4>
+        <div style="font-size: 11pt; font-weight: 900; color: #ffffff;">₹220,848 / yr</div>
+        <p style="font-size: 7.5pt; color: #94a3b8; margin-top: 2px;">Dedicated M10 + Pro Railway + CDN + SMS Pack.</p>
+      </div>
+      <div class="card">
+        <h4 style="font-size: 8.5pt; color: #fbbf24;">Tier 3: Enterprise Scale</h4>
+        <div style="font-size: 11pt; font-weight: 900; color: #ffffff;">₹1,154,040 / yr</div>
+        <p style="font-size: 7.5pt; color: #94a3b8; margin-top: 2px;">100k+ MAU, M30 Cluster, Redis & WhatsApp API.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PAGE 4: GST & MSME COMPLIANCE ================= -->
+  <div class="page">
+    <div class="header-bar">
+      <div>
+        <div class="header-brand"><span class="gradient-text">✨ Milan AI</span></div>
+        <div class="header-tagline">GST Invoicing & MSME Procurement Compliance</div>
+      </div>
+      <div>
+        <span class="badge badge-teal">Statutory Tax Guidelines</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">4. GST Compliance, Invoicing & MSME Verification</h2>
+    <p class="section-desc">
+      Statutory accounting guidelines for claiming Input Tax Credit (ITC) under Indian GST law (SAC Codes 998314 / 998315).
+    </p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="font-size: 9.5pt; color: #ff66b2; margin-bottom: 6px;">📋 Input Tax Credit (ITC) Checklist</h3>
+        <div class="check-item"><span class="check-icon">1.</span><span><strong>Valid 15-Digit GSTIN:</strong> Vendor must provide authentic GST certificate.</span></div>
+        <div class="check-item"><span class="check-icon">2.</span><span><strong>Buyer Billing Details:</strong> Correct legal entity name & state code matching buyer GSTIN.</span></div>
+        <div class="check-item"><span class="check-icon">3.</span><span><strong>GSTR-1 to GSTR-2B Reflection:</strong> Vendor must upload invoice on GST portal.</span></div>
+        <div class="check-item"><span class="check-icon">4.</span><span><strong>SAC Code Specification:</strong> Appropriate SAC (<code>998314</code>, <code>998315</code>, <code>998316</code>).</span></div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size: 9.5pt; color: #00f5d4; margin-bottom: 6px;">🏭 MSME Udyam Verification Rules</h3>
+        <div class="check-item"><span class="check-icon">1.</span><span><strong>Udyam Certificate:</strong> Obtain 19-digit Udyam number (<code>UDYAM-XX-00-0000000</code>).</span></div>
+        <div class="check-item"><span class="check-icon">2.</span><span><strong>Portal Verification:</strong> Verify on <code>https://udyamregistration.gov.in</code>.</span></div>
+        <div class="check-item"><span class="check-icon">3.</span><span><strong>45-Day Statutory Payment Rule:</strong> Settle micro/small vendors within 45 days.</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size: 9.5pt; margin-top: 8px; margin-bottom: 4px;">Sample Invoice Requirement Format</h3>
+    <div class="code-box">
+========================================================================================
+[SAMPLE VENDOR INVOICE TEMPLATE — FOR PROCUREMENT REFERENCE ONLY]
+                        *** NOT AN ACTUAL TAX INVOICE ***
+========================================================================================
+SUPPLIER : [Vendor Legal Name Pvt. Ltd.] | GSTIN: [27AAAAA0000A1Z5] | State: [27-MH]
+BUYER    : [Client Entity Name]          | GSTIN: [07BBBBB0000B1Z2] | State: [07-DL]
+METADATA : Invoice No: INV-2026-XXXX     | Date: DD/MM/YYYY        | POS: [07-Delhi]
+----------------------------------------------------------------------------------------
+S.No | Description of Supply         | SAC Code | Qty | Unit Price (INR) | Taxable Value
+----------------------------------------------------------------------------------------
+ 01  | Cloud Hosting & Database Eng. | 998315   | 01  | ₹ 10,000.00      | ₹ 10,000.00
+ 02  | API Gateway & OTP Service     | 998314   | 01  | ₹  5,000.00      | ₹  5,000.00
+----------------------------------------------------------------------------------------
+                                                   Total Taxable Amount  : ₹ 15,000.00
+                                                   IGST @ 18% (Interstate): ₹  2,700.00
+                                                   TOTAL INVOICE VALUE   : ₹ 17,700.00
+========================================================================================</div>
+
+    <div class="card-glass" style="margin-top: 10px; text-align: center; padding: 12px;">
+      <h4 style="font-size: 11pt; margin-bottom: 2px;">Milan AI Project Architecture Sign-Off</h4>
+      <p style="font-size: 7.5pt; color: #cbd5e1;">
+        Production repositories: <code>Sudhanshu-Kumar-Jha/Milan-AI</code> &bull; Live Railway URL: <code>https://milan-ai-production.up.railway.app</code>
+      </p>
+    </div>
+  </div>
+
+</body>
+</html>
